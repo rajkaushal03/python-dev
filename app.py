@@ -4,6 +4,9 @@ import os
 import re
 import docx
 import fitz
+from spire.doc import *
+from spire.doc.common import *
+
 
 app = Flask(__name__)
 
@@ -22,11 +25,10 @@ def extract_text_from_docx(file_path):
     return full_text
 
 def extract_text_from_doc(file_path):
-    doc = docx.Document(file_path)
-    full_text = ""
-    for paragraph in doc.paragraphs:
-        full_text += paragraph.text
-    return full_text
+    doc = Document()
+    doc = docx.LoadFromFile (file_path)
+    str = doc.GetText()
+    return str
 
 def extract_emails(text):
     email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
@@ -91,4 +93,4 @@ def save_to_excel(processed_data):
     df.to_excel('cv_data.xlsx', index=False)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=8080, debug=True)
