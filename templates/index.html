@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Data</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto py-8">
+        <h1 class="text-3xl font-bold mb-4 text-center">CV Data Extractor</h1>
+        
+        {% if show_download %}
+        <div class="mt-8" {% if not data %}style="display: none;"{% endif %}>
+            <form id="downloadForm" action="/download_excel" method="post">
+                <input type="hidden" name="data" id="jsonData" value='{{ data_for_download | safe }}'>
+                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 ml-2 rounded-lg">
+                    <i class="fas fa-download"></i> Download Excel
+                </button>
+            </form>
+        </div>
+        {% endif %}
+        
+        <form id="uploadForm" action="/upload_file" method="post" enctype="multipart/form-data" class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
+            <div class="mb-4">
+                <label for="file" class="block text-gray-700 font-bold mb-2">Upload File(s):</label>
+                <div class="flex items-center">
+                    <input type="file" name="files[]" id="file" class="w-full py-2 px-4 border rounded-lg focus:outline-none focus:border-blue-500" multiple>
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 ml-2 rounded-lg">
+                        <i class="fas fa-upload"></i> Upload
+                    </button>
+                </div>
+            </div>
+        </form>
+        
+        {% if data %}
+        <div class="mt-8">
+            <h2 class="text-2xl font-bold mb-4">Processed Data</h2>
+            <table class="w-full border-collapse border border-gray-400">
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="border border-gray-400 px-4 py-2">File Name</th>
+                        <th class="border border-gray-400 px-4 py-2">Text</th>
+                        <th class="border border-gray-400 px-4 py-2">Emails</th>
+                        <th class="border border-gray-400 px-4 py-2">Phone Numbers</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in data %}
+                    <tr>
+                        <td class="border border-gray-400 px-4 py-2">{{ entry['File Name'] }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ entry['Text'] }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ entry['Emails'] }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ entry['Phone Numbers'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
