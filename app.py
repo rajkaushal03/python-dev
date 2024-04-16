@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import re
 import docx
+from docx import Document
 import fitz
 from spire.doc import *
 from spire.doc.common import *
@@ -25,17 +26,17 @@ def extract_text_from_docx(file_path):
     return full_text
 
 def extract_text_from_doc(file_path):
-    doc = Document()
-    doc = docx.LoadFromFile (file_path)
-    str = doc.GetText()
-    return str
-
+    doc = docx.Document(file_path)
+    full_text = ""
+    for paragraph in doc.paragraphs:
+        full_text += paragraph.text
+    return full_text
 def extract_emails(text):
-    email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b'
     return re.findall(email_pattern, text)
 
 def extract_phone_numbers(text):
-    phone_pattern = r'\b(?:\d{3}[-\.\s]??\d{3}[-\.\s]??\d{4}|\(\d{3}\)\s*\d{3}[-\.\s]??\d{4}|\d{3}[-\.\s]??\d{4})\b'
+    phone_pattern = r'\b(?:\+\d{1,3}\s*)?(?:[6-9]\d{9}|[6-9]\d{11})\b'
     return re.findall(phone_pattern, text)
 
 def process_file(file_path):
@@ -65,7 +66,7 @@ def index():
 @app.route('/upload_file', methods=['POST'])
 def upload_file():
     files = request.files.getlist('files[]')
-    processed_data = []  # Define the processed data list here
+    processed_data = []
     for file in files:
         file_path = os.path.join(uploads_dir, file.filename)
         file.save(file_path)
@@ -76,9 +77,12 @@ def upload_file():
             print(f"Error processing {file.filename}: {e}")
     if processed_data:
         save_to_excel(processed_data)
-        return send_file('cv_data.xlsx', as_attachment=True)
+        return render_template('index.html', data=processed_data, show_download=True)  # Render template with processed data
     else:
         return "No data to download."
+@app.route('/download_excel', methods=['POST'])
+def download_excel():
+    return send_file('cv_data.xlsx', as_attachment=True)
 
 def save_to_excel(processed_data):
     data_for_excel = []
